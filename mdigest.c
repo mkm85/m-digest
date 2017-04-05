@@ -57,7 +57,7 @@ size_t mdigest_find_bucket(struct mdigest* dgst, value_t value)
     }
     
     for (i = 0; i < MDIGEST_BUCKETS-1; i++) {
-        if ((dgst->centroids[i].centroid >= value) && (dgst->centroids[i+1].centroid <= value)) {
+        if ((dgst->centroids[i].centroid >= value) && (dgst->centroids[i+1].centroid < value)) {
             // the value is between center of centroid i and i+1
             // return the nearest bucket.
             double dist1 = fabs(dgst->centroids[i].centroid - value);
@@ -100,22 +100,42 @@ double mdigest_get_quantile(struct mdigest* dgst, double quantile)
 
 void mdigest_add(struct mdigest* dgst, value_t value, weight_t weight)
 {
+    if (weight < 1) {
+        return;
+    }
+    
+    if (dgst->count == 0) {
+        size_t i;
+        
+        // special case for the first value
+        dgst->min = value;
+        dgst->max = value;
+
+        for (i = 0; i < MDIGEST_BUCKETS; i++) {
+            dgst->centroids[i].centroid = value;
+        }
+        //dgst->count = 1;
+    }
+
+    if (value < dgst->min) {
+        dgst->min = value;
+    }
+
+    if (value > dgst->max) {
+        dgst->max = value;
+    }
+    
     while (weight > 0) {
-        if (dgst->count < MDIGEST_BUCKETS) {
-            mdigest_initial_insert(dgst, value);
-            weight--;
-        } else {
-            // find a bucket where the value can be
-            size_t bucket = mdigest_find_bucket(dgst, value);
-            struct centroid* c = &dgst->centroids[bucket];
-            // how much of the weight to insert into the fund bucket
-            weight_t weightToInsert = MDIGEST_MIN(weight, (c->target - c->count));
-            centroid_add(c, value, weightToInsert);
-            weight -= weightToInsert;
-            dgst->count += weightToInsert;
-            if (weight > 0) {
-                mdigest_rebalance(dgst, bucket);
-            }
+        // find a bucket where the value can be
+        size_t bucket = mdigest_find_bucket(dgst, value);
+        struct centroid* c = &dgst->centroids[bucket];
+        // how much of the weight to insert into the fund bucket
+        weight_t weightToInsert = MDIGEST_MIN(weight, (c->target - c->count));
+        centroid_add(c, value, weightToInsert);
+        weight -= weightToInsert;
+        dgst->count += weightToInsert;
+        if (weight > 0) {
+            mdigest_rebalance(dgst, bucket);
         }
     }
 }
@@ -124,33 +144,6 @@ void centroid_swap(struct centroid * lhs, struct centroid * rhs)
 {
     MDIGEST_SWAP(*lhs, *rhs);
 }
-
-void mdigest_initial_insert(struct mdigest* dgst, value_t value)
-{
-    struct centroid buffer;
-    centroid_init(&buffer);
-    buffer.target = 1;
-    centroid_add(&buffer, value, 1);
-    dgst->count++;
-    // check for 0 since we default initialize to 0
-    if (value <= 0) {
-        // insert from bottom
-        size_t j = 0;
-        while (j < MDIGEST_BUCKETS && dgst->centroids[j].centroid > buffer.centroid) {
-            centroid_swap(&buffer, &dgst->centroids[j]);
-            j++;
-        }
-    }
-    if (value > 0) {
-        // insert from top
-        size_t j = MDIGEST_BUCKETS-1;
-        while (j >= 0 && dgst->centroids[j].centroid < buffer.centroid) {
-            centroid_swap(&buffer, &dgst->centroids[j]);
-            j--;
-        }
-    }
-}
-
 void mdigest_rebalance(struct mdigest* dgst, size_t bucket)
 {
     size_t i;
@@ -161,6 +154,9 @@ void mdigest_rebalance(struct mdigest* dgst, size_t bucket)
     for (i = 0; i < MDIGEST_BUCKETS; i++) {
         // ceil
         weight_t newTarget = (dgst->target-1) / MDIGEST_BUCKETS + 1;
+        if (newTarget < 2) {
+            newTarget = 2;
+        }
 
         dgst->centroids[i].target = newTarget;
     }
@@ -187,7 +183,7 @@ void mdigest_rebalance(struct mdigest* dgst, size_t bucket)
             }
         }
     } else {
-        // merge tp the right
+        // merge to the right
         for (i = bucket; i < MDIGEST_BUCKETS-1; i++) {
             struct centroid* this = &dgst->centroids[i];
             struct centroid* next = &dgst->centroids[i+1];
@@ -210,7 +206,9 @@ bool mdigest_rebalance_centroids(struct centroid* this, struct centroid* next)
         value_t tooMuch = this->count - ((this->target -1) / 2 + 1);
         centroid_add(this, this->centroid, -tooMuch);
         centroid_add(next, this->centroid, tooMuch);
-        return true;
+        if (next->count > next->target) {
+            return true;
+        }
     }
     return false;
 }

@@ -7,7 +7,7 @@
 
 // WLOG, this has to be an even number for simplicity
 #ifndef MDIGEST_BUCKETS
-#define MDIGEST_BUCKETS 128
+#define MDIGEST_BUCKETS 32
 #endif
 
 typedef double value_t;
@@ -48,6 +48,9 @@ struct centroid {
 
 struct mdigest {
     struct centroid centroids[MDIGEST_BUCKETS];
+    // min and max are extrema bucket with a weight of one
+    value_t min;
+    value_t max;
     weight_t count;
     weight_t target;
 };
@@ -66,10 +69,6 @@ void mdigest_init(struct mdigest* dgst);
  * add value with a weight to the mdigest structure.
  */
 void mdigest_add(struct mdigest* dgst, value_t value, weight_t weight);
-
-void mdigest_initial_insert(struct mdigest* dgst, value_t value);
-
-
 
 void mdigest_rebalance(struct mdigest* dgst, size_t bucket);
 
