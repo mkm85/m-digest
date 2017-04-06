@@ -42,10 +42,6 @@ struct centroid {
  * 
  */
 
-#define upper(quantile, n) ((quantile)((1-quantile)*4*n))
-
-
-
 struct mdigest {
     struct centroid centroids[MDIGEST_BUCKETS];
     // min and max are extrema bucket with a weight of one

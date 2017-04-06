@@ -13,8 +13,7 @@ algorithm is inspired by t-digest
   * All the algotihmic aspects which has to do with removing and
     inserting centroids into a set of centroids.
 
+## TODO
 
-
-
-
-
+  * Implement a distribution function such that extrema centroids have smaller weight than the others.
+  * Implement averaging between centroids when calculating quantiles.
