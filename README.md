@@ -2,17 +2,17 @@
 
 WIP, NOT PRODUCTION READY
 
-The name is inspired by t-digest and the implementation is likewise
-inspired by t-digest. For resource constrained devices the t-digest
-has a few problems. 
+The m-digest is a fast streaming quantile calculation algorithm
+especially targeted for resource constrained devices. The name and
+algorithm is inspired by t-digest
+[https://github.com/tdunning/t-digest].
 
-1. It requires memory management, this could be overcome with a static
-memory pool for the tree, then one has essentially implemented their
-own malloc/free
-2. A fast implementation is a bit complex in terms of lines of code.
+### Differences with t-digest
 
-The m-digest tries to solve these problem by using a constant size
-datastructure consisting of centroids.
+  * It uses a static array of centroids, this avoids malloc.
+  * All the algotihmic aspects which has to do with removing and
+    inserting centroids into a set of centroids.
+
 
 
 
