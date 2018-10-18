@@ -30,9 +30,9 @@ struct centroid {
  * with the quantile q is (q(1-q)*4*n) where n is the total weight of
  * all samples.
  *
- * Too keep the implementation simple the buckets contains a weight distribution where the total number of elements is k*2*2*2^(buckets/2) starting with k = 1. The k value is a layer. each layer can contain max k*2*2*2^(buckets/2) observations. When the number of elements reaches 
+ * Too keep the implementation simple the buckets contains a weight distribution where the total number of elements is k*2*2*2^(buckets/2) starting with k = 1. The k value is a layer. each layer can contain max k*2*2*2^(buckets/2) observations.
  * 
- * When a bucket reaches max the upper bound is set to 2xcurrent weight and the buckets is rebalanced such that each bucket contains exactly bucketSize/2 elements.
+ * When a bucket reaches max, the upper bound is set to 2xcurrent weight and the buckets is rebalanced such that each bucket contains exactly bucketSize/2 elements.
  * 
  * The algorithm has two phases initial fillup and aggregation. In the
  * initial fillup each centroid is assigned a value. When each
