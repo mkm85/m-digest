@@ -17,6 +17,21 @@ algorithm is inspired by t-digest/q-digest.
 
   * Implement averaging between centroids when calculating quantiles.
 
+## Data structure
+
+The datastructure consists of `m` buckets where `m` is some fixed
+constant. Each bucket is a centroid. A centroid consists of a mean and
+a count.
+
+## initial data structure.
+
+The initial datastructure has a capacity of one for each bucket.
+
+## Increase bucket capacity
+
+Every now and then the algorithm increases the capacity of the
+buckets. The capacity increase is made in such a way that the
+observations with the most relevance is in the smallest buckets.
 
 ## Merging
 
@@ -58,9 +73,10 @@ buckets.
 ## Fast insert
 Since the last buckets are the largest, new insert search from the
 back until the best bucket for a fit is found. This way a binary
-search is not needed an the average number og searched buckets is
+search is not needed and the average number og searched buckets is
 log_2(number of buckets). which is as fast as a binary search for the
-desired bucket.
+desired bucket. This algorithm has a worst case complexity of O(`m` *
+`n`)
 
 
 ## difference between two mdigests
