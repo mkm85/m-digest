@@ -28,3 +28,5 @@ void mdigest_merge(struct mdigest* mdigest, struct mdigest* toBeMerged);
 double mdigest_get_quantile(struct mdigest* mdigest, double quantile);
 
 void print_digest(struct mdigest* md);
+
+void mdigest_merge(struct mdigest* md, struct mdigest* toMerge);

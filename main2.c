@@ -8,16 +8,41 @@ int main(int argc, const char** argv)
     printf("init\n");
     struct mdigest md;
     mdigest_init(&md);
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 10000; i > 0; i--) {
         double val = rand();
-        mdigest_observe(&md, val);
-        print_digest(&md);
+        mdigest_observe(&md, i);
+        //print_digest(&md);
     }
 
     print_digest(&md);
+    
+    struct mdigest md2;
+    mdigest_init(&md2);
+    for (int i = 0; i < 10000; i++) {
+        double val = rand();
+        mdigest_observe(&md2, i);
+        //print_digest(&md);
+    }
 
-    printf("0.001 quantile %f\n", mdigest_get_quantile(&md, 0.001));
-    printf("0.01 quantile %f\n", mdigest_get_quantile(&md, 0.01));
-    printf("0.1 quantile %f\n", mdigest_get_quantile(&md, 0.1));
+    print_digest(&md2);
+
+    struct mdigest md3;
+    mdigest_init(&md3);
+    for (int i = 0; i < 10000; i++) {
+        double val = rand();
+        mdigest_observe(&md3, val);
+        //print_digest(&md);
+    }
+
+    print_digest(&md3);
+
+
+    /* struct mdigest md4; */
+    /* mdigest_init(&md4); */
+
+    /* mdigest_merge(&md4, &md3); */
+    /* print_digest(&md4); */
+    /* mdigest_merge(&md4, &md2); */
+    /* print_digest(&md4); */
     
 }

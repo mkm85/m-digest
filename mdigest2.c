@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
+static double mdigest_fill_rate_count(struct mdigest* md, uint64_t target);
+
 void mdigest_init(struct mdigest* md)
 {
     md->count = 0;
@@ -21,6 +23,7 @@ void print_digest(struct mdigest* md)
     }
 }
 
+
 static void mdigest_merge_centroids(struct centroid* c1, struct centroid* c2)
 {
     //printf("merging centroids\n");
@@ -39,7 +42,7 @@ static void increase_max_count(struct mdigest* md)
     //printf("increase max count\n");
     //print_digest(md);
     uint64_t max = md->maxCounts[MDIGEST_BUCKETS-1];
-    max *= 2;
+    max = ceil(max*2);
     for (int i = MDIGEST_BUCKETS - 1; i >= 0; i--) {
         uint64_t tmp = max;
         max = md->maxCounts[i];
@@ -130,3 +133,38 @@ double mdigest_get_quantile(struct mdigest* md, double quantile)
         }
     }
 }
+
+double mdigest_fill_rate_count(struct mdigest* md, uint64_t target)
+{
+    uint64_t totalRoom = 0;
+    for (int i = 0; i < MDIGEST_BUCKETS; i++) {
+        totalRoom += md->maxCounts[i];
+    }
+
+    if (target == 0) {
+        return 0.0;
+    }
+    totalRoom/target;
+}
+
+/* void mdigest_merge(struct mdigest* md, struct mdigest* merge) */
+/* { */
+/*     uint64_t target = md->count + merge->count; */
+    
+/*     while (mdigest_fill_rate_count(md, target) > 0.5) { */
+/*         increase_max_count(md); */
+/*     } */
+
+/*     int i = 0; */
+/*     int j = 0; */
+
+/*     while(i != MDIGEST_BUCKETS && j != MDIGEST_BUCKETS) { */
+
+/*         if (md->centroids[i].mean < merge->centroids[j].mean) { */
+            
+/*         } */
+        
+/*     } */
+    
+/*     for (int i = 0; i < ) */
+/* } */
